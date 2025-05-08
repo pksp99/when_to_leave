@@ -10,6 +10,8 @@ from src.commons import math_expressions as mexpr
 
 from sympy import simplify, real_roots, symbols
 
+import json
+import hashlib
 
 def plot_gamma(shape=2, scale=2):
     # Generate x values
@@ -161,6 +163,15 @@ def get_u_star_binary_fast(N: int, alpha: float, beta: float, h: float, c: float
 
     return round((start + end) / 2, precision)
 
+def robust_u_star_estimator(N: int, alpha: float, beta: float, h: float, c:float, mean_n=None, precision=8) -> float:
+    # Unable to compute u* cases
+    if mean_n is not None and (alpha * N <= 1 or \
+        alpha * N > 500 or \
+        h / c >= 1 / beta):
+        return mean_n * N
+    else:
+        return get_u_star_binary_fast(N, alpha, beta, h, c)
+
 
 def file_path(file_name, dir_name='data'):
     # Get the directory of the current module
@@ -168,8 +179,83 @@ def file_path(file_name, dir_name='data'):
 
     # Define the sibling directory path
     parent_dir = os.path.dirname(module_dir)
-    data_folder_path = os.path.join(parent_dir, dir_name)
+    parent_parent_dir = os.path.dirname(parent_dir)
+    data_folder_path = os.path.join(parent_parent_dir, dir_name)
 
     # Create the full file path
     file_path = os.path.join(data_folder_path, file_name)
     return file_path
+
+
+def get_config_hash(config: dict, length=5):
+
+    # requires v to be iterable
+    s = json.dumps({k: list(sorted(v)) for k, v in (config.items())}, sort_keys=True)
+    # Compute SHA-256 hash and return first `length` characters
+    return (hashlib.sha256(s.encode('utf-8')).hexdigest()[:length])
+
+def cal_oracle_cost_fix_n(alpha, beta, intervals, h, c, travel_time, n):
+    total = len(intervals)
+    N = total - n
+    u_star = get_u_star_binary_fast(N=N, alpha=alpha, beta=beta, h=h, c=c)
+    reach_time = sum(intervals[:n]) + max(u_star, travel_time)
+    cost = cal_cost(c=c, h=h, actual_time=sum(intervals), predicted_time=reach_time)
+    return cost
+
+def cal_PTO_cost_fix_n(intervals, h, c, travel_time, n):
+    total = len(intervals)
+    N = total - n
+    mean_n = statistics.mean(intervals[:n])
+    alpha_hat, beta_hat = gamma_estimate_parameters(n=n, intervals=intervals)
+    u_star_hat = robust_u_star_estimator(N=N, alpha=alpha_hat, beta=beta_hat, h=h, c=c, mean_n=mean_n)
+    reach_time = sum(intervals[:n]) + max(u_star_hat, travel_time)
+    cost = cal_cost(c=c, h=h, actual_time=sum(intervals), predicted_time=reach_time)
+    return cost
+
+def cal_oracle_cost_var_n(alpha, beta, intervals, h, c, travel_time):
+    total = len(intervals)
+    N = total
+    n = 0
+    u_star = get_u_star_binary_fast(N=N, alpha=alpha, beta=beta, h=h, c=c)
+    t_now = 0
+    next_event = intervals[n]
+    while (travel_time < u_star) and (N > 0):
+        t_now = min(u_star - travel_time, next_event)
+        if t_now == next_event:
+            N -= 1
+            n += 1
+            u_star = get_u_star_binary_fast(N=N, alpha=alpha, beta=beta, h=h, c=c)
+            t_now = 0
+            next_event = intervals[n]
+        else:
+            break
+    
+    reach_time = sum(intervals[:n]) + max(u_star, travel_time)
+    cost = cal_cost(c=c, h=h, actual_time=sum(intervals), predicted_time=reach_time)
+    return cost, n
+
+def cal_PTO_cost_var_n(intervals, h, c, travel_time):
+    total = len(intervals)
+    N = total - 3
+    n = 3
+    mean_n = statistics.mean(intervals[:n])
+    alpha_hat, beta_hat = gamma_estimate_parameters(n=n, intervals=intervals)
+    u_star_hat = robust_u_star_estimator(N=N, alpha=alpha_hat, beta=beta_hat, h=h, c=c, mean_n=mean_n)
+    t_now = 0
+    next_event = np.random.gamma(alpha_hat, beta_hat)
+    while (travel_time < u_star_hat) and (N > 0):
+        t_now = min(u_star_hat - travel_time, next_event)
+        if t_now == next_event:
+            N -= 1
+            n += 1
+            mean_n = statistics.mean(intervals[:n])
+            alpha_hat, beta_hat = gamma_estimate_parameters(n=n, intervals=intervals)
+            u_star_hat = robust_u_star_estimator(N=N, alpha=alpha_hat, beta=beta_hat, h=h, c=c, mean_n=mean_n)
+            t_now = 0
+            next_event = np.random.gamma(alpha_hat, beta_hat)
+        else:
+            break
+    
+    reach_time = sum(intervals[:n]) + max(u_star_hat, travel_time)
+    cost = cal_cost(c=c, h=h, actual_time=sum(intervals), predicted_time=reach_time)
+    return cost, n
