@@ -170,6 +170,7 @@ class EnvImpr(gym.Env):
         if action == 1:
             cost = methods.cal_cost(c=self.c, h=self.h, actual_time=self.cum_sum_intervals[-1], predicted_time=self.cur_time + self.travel_time)
             self.obs_intervals = self.intervals[:self.total]
+            self.final_observed_n = self.n
             self.n = self.total
             self.N = 0
             return self._get_obs(), -cost, True, False, self._get_info()

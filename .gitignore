@@ -2,6 +2,7 @@ data/*.log
 data/prof_data/*
 data/*.csv
 */models/*.zip
+*.zip
 mlruns/
 catboost_info/
 # Byte-compiled / optimized / DLL files
