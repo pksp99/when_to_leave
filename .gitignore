@@ -5,6 +5,8 @@ data/*.pkl
 data/*.json
 */models/*.zip
 *.zip
+*.pkl
+*.json
 mlruns/
 catboost_info/
 # Byte-compiled / optimized / DLL files
