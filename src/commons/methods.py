@@ -194,6 +194,16 @@ def get_config_hash(config: dict, length=5):
     # Compute SHA-256 hash and return first `length` characters
     return (hashlib.sha256(s.encode('utf-8')).hexdigest()[:length])
 
+def abbreviate_number(num):
+    if num >= 1_000_000_000:
+        return f"{num // 1_000_000_000}B"
+    elif num >= 1_000_000:
+        return f"{num // 1_000_000}M"
+    elif num >= 1_000:
+        return f"{num // 1_000}K"
+    else:
+        return str(num)
+
 def cal_oracle_cost_fix_n(alpha, beta, intervals, h, c, travel_time, n):
     total = len(intervals)
     N = total - n

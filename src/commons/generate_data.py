@@ -1,117 +1,67 @@
-import concurrent.futures
-import logging
+import numpy as np
 import os
-import random
-import statistics
+import pandas as pd
 
+from src.commons import methods
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-
-import methods
-from methods import file_path
-
-
-def configure_logging(log_file):
-    logging.basicConfig(
-        filename=file_path(log_file, 'data'),
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+from pathlib import Path
+from typing import Dict, Any
+from src.commons import methods
+import json
 
 
-def process_iter(config, log_file, index, row=None):
-    # Configure logging
-    configure_logging(log_file)
+def get_realized_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate a single row of synthetic data based on the given configuration."""
+    alpha = np.random.choice(config['alpha_range'])
+    beta = np.random.choice(config['beta_range'])
+    h = np.random.choice(config['h_range'])
+    c = np.random.choice(config['c_range'])
+    total = np.random.choice(config['total'])
 
-    if row is None:
-        # Randomly select parameters from config ranges
-        row = {key: random.choice(config[key + '_range']) for key in ['alpha', 'beta', 'h', 'c', 'N', 'n']}
-        alpha, beta, h, c, N, n = row.values()
-        intervals = np.random.gamma(shape=alpha, scale=beta, size=N + n)
-    else:
-        # Use existing parameters
-        alpha, beta, h, c, N, n = row['alpha'], row['beta'], row['h'], row['c'], row['N'], row['n']
-        intervals = [float(x) for x in row['intervals_str'].split('_')]
+    intervals = np.random.gamma(shape=alpha, scale=beta, size=total)
 
-    # Generate intervals and calculate statistics
-    mean_n = statistics.mean(intervals[:n])
-    std_n = statistics.stdev(intervals[:n])
-    alpha_hat, beta_hat = methods.gamma_estimate_parameters(n, intervals)
+    if config['travel_time'] == 'high':
+        travel_time = np.sum(intervals[3:]) - np.random.gamma(shape=2, scale=alpha * beta)
+    elif config['travel_time'] == 'low':
+        travel_time = np.random.gamma(shape=2, scale=2 * alpha * beta)
+    else:  # 'uniform'
+        travel_time = np.sum(intervals[3:]) * np.random.uniform(0, 1)
 
-    row.update({
-        'mean_n': mean_n,
-        'std_n': std_n,
-        'alpha_hat': alpha_hat,
-        'beta_hat': beta_hat,
-        'intervals_str': '_'.join(map(str, intervals))
-    })
+    travel_time = max(alpha * beta, travel_time)
 
-    logging.info(f"Start process-{index}: {row}")
-
-    # Unable to compute u* cases
-    if alpha_hat * N <= 1 or alpha_hat * N > 600:
-        logging.critical(f'End process-{index}: alpha_hat < 1')
-        return None
-    elif h / c >= 1 / beta:
-        logging.critical(f'End process-{index}: Impossible beta: {beta}, for h: {h} and c: {c}')
-        return None
-    elif h / c >= 1 / beta_hat:
-        logging.critical(f'End process-{index}: Impossible beta_hat: {beta_hat}, for h: {h} and c: {c}')
-        return None
-
-    # Compute additional metrics
-    u = methods.cal_actual_time(n, intervals)
-    u_star = methods.get_u_star_binary_fast(N, alpha, beta, h, c)
-    u_star_hat = methods.get_u_star_binary_fast(N, alpha_hat, beta_hat, h, c)
-    z = u_star / u_star_hat
-    optimal_cost = methods.cal_cost(c, h, u, u_star)
-    actual_cost = methods.cal_cost(c, h, u, u_star_hat)
-
-    row.update({
-        'u': u,
-        'u_star': u_star,
-        'u_star_hat': u_star_hat,
-        'z': z,
-        'optimal_cost': optimal_cost,
-        'actual_cost': actual_cost
-    })
-
-    logging.info(f'End process-{index}: {row}')
-    return row
+    return {
+        'alpha': alpha,
+        'beta': beta,
+        'h': h,
+        'c': c,
+        'total': total,
+        'intervals': intervals,
+        'travel_time': travel_time,
+    }
 
 
-def update_progress(_):
-    global pbar
-    pbar.update()
+def generate(config: Dict[str, Any], row_count: int) -> str:
+    """Generate and persist a synthetic dataset based on the given configuration."""
+    dataset_name = f"{methods.get_config_hash(config)}_{methods.abbreviate_number(row_count)}"
+    data_file_path = Path(methods.file_path(dataset_name, 'data'))
 
+    pickle_path = data_file_path.with_suffix('.pkl')
 
-def generate(config, output: str, log_file: str, n: int = 1000, df: pd.DataFrame | None = None, overwrite: bool = True):
-    # Delete log file if exists
-    if os.path.exists(file_path(log_file, 'data')):
-        os.remove(file_path(log_file, 'data'))
+    if pickle_path.is_file():
+        print(f"[INFO] Dataset already exists:\n{pickle_path}\n")
+        return str(pickle_path)
 
-    if overwrite == False and os.path.exists(file_path(output, 'data')):
-        return
+    print(f"[INFO] Generating new dataset:\n{data_file_path}\n")
 
-    global pbar
-    results = []
-    if df is None:
-        pbar = tqdm(total=n, desc=f"Processing {output}")
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            submits = [executor.submit(process_iter, config, log_file, i) for i in range(n)]
-            for f in concurrent.futures.as_completed(submits):
-                update_progress(f.result())
-                results.append(f.result())
-    else:
-        pbar = tqdm(total=len(df), desc=f"Processing {output}")
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            submits = [executor.submit(process_iter, config, log_file, i, row.to_dict()) for i, row in df.iterrows()]
-            for f in concurrent.futures.as_completed(submits):
-                update_progress(f.result())
-                results.append(f.result())
+    # Efficiently generate all data records
+    records = [get_realized_data(config) for _ in range(row_count)]
+    df = pd.DataFrame(records)
 
-    pbar.close()
-    results = [x for x in results if x is not None]
-    df = pd.DataFrame(results)
-    df.to_csv(file_path(output, 'data'), index=False)
+    # Persist the dataset
+    df.to_csv(data_file_path.with_suffix('.csv'), index=False)
+    df.to_pickle(pickle_path)
+    with open(str(data_file_path.with_suffix('.json')), 'w') as f:
+        json.dump(config, f, indent=4)
+
+    return str(pickle_path)

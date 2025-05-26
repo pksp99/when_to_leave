@@ -1,6 +1,8 @@
 data/*.log
 data/prof_data/*
 data/*.csv
+data/*.pkl
+data/*.json
 */models/*.zip
 *.zip
 mlruns/
