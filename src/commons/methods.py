@@ -7,6 +7,7 @@ import plotly.graph_objs as go
 from scipy.stats import gamma
 
 from src.commons import math_expressions as mexpr
+from src.commons.constants import AlphaEstimator
 
 from sympy import simplify, real_roots, symbols
 
@@ -92,13 +93,44 @@ def get_u_star(N: int, alpha: float, beta: float, h: float, c: float) -> float:
     u_star = [sol.evalf() for sol in u_star if sol.is_real and sol > 0]
     return float(u_star[0])
 
+def gamma_shape_max_likeli_estim(n: int, intervals: list[float]) -> float:
+    n_intervals = intervals[:n]
+    mean = statistics.mean(n_intervals)
+    W_hat = math.log(mean) - sum(map(math.log, n_intervals)) / n
+    alpha_hat = (3 - W_hat + math.sqrt((3 - W_hat)**2 + 24 * W_hat)) / (12 * W_hat)
+    return alpha_hat
 
-def gamma_estimate_parameters(n: int, intervals: list[float]) -> tuple[float, float]:
-    mean = statistics.mean(intervals[:n])
-    variance = statistics.variance(intervals[:n])
-    beta = variance / mean
-    alpha = mean / beta
-    return (alpha, beta)
+def gamma_shape_gen_max_likeli_estim_bias(n: int, intervals: list[float]) -> float:
+    pass
+
+def gamma_shape_gen_max_likeli_estim_unbias(n: int, intervals: list[float]) -> float:
+    pass
+
+def gamma_estimate_parameters(n: int, intervals: list[float], param_estimator: AlphaEstimator) -> tuple[float, float]:
+    n_intervals = intervals[:n]
+    mean = statistics.mean(n_intervals)
+    variance = statistics.variance(n_intervals)
+    beta_hat = variance / mean
+
+    if param_estimator == AlphaEstimator.MOMENTS:
+        alpha_hat = mean / beta_hat
+    
+    elif param_estimator == AlphaEstimator.MAX_LIKELI:
+        alpha_hat = gamma_shape_max_likeli_estim(n, intervals=intervals)
+    
+    elif param_estimator == AlphaEstimator.MAX_LIKELI_GEN_GAMMA_BIAS:
+        alpha_hat = gamma_shape_gen_max_likeli_estim_bias(n, intervals=intervals)
+    
+    elif param_estimator == AlphaEstimator.MAX_LIKELI_GEN_GAMMA_UNBIAS:
+        alpha_hat = gamma_shape_gen_max_likeli_estim_unbias(n, intervals=intervals)
+    
+    else:
+        print(f"[ERROR] Unsupported estimator: {param_estimator}")
+        raise Exception(f"Unsupported estimator: {param_estimator}")
+    
+    beta_hat = mean / alpha_hat
+        
+    return (alpha_hat, beta_hat)
 
 
 def get_u_star_binary(N: int, alpha: float, beta: float, h: float, c: float, precision=8) -> float:

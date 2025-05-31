@@ -4,15 +4,8 @@ import statistics
 from src.commons import methods, generate_data
 import numpy as np
 from typing import override
+from src.commons.constants import DEFAULT_CONFIG
 
-DEFAULT_CONFIG = {
-    'alpha_range': [ (0 + i / 10) for i in range(1,10)],
-    'beta_range': [round(i * 0.5, 1) for i in range(2, 6)],
-    'h_range': [0.5],
-    'c_range': [25],
-    'total': range(10, 40), 
-    'travel_time': 'uniform',
-}
 
 class BaseEnv(gym.Env):
     def __init__(self, config=DEFAULT_CONFIG, step_size=0.1):
@@ -50,7 +43,7 @@ class BaseEnv(gym.Env):
         self.std_n = statistics.stdev(self.obs_intervals)
         self.step_size = self.mean_n / 10
 
-        self.alpha_hat, self.beta_hat = methods.gamma_estimate_parameters(self.n, self.intervals)
+        self.alpha_hat, self.beta_hat = methods.gamma_estimate_parameters(self.n, self.intervals, param_estimator=self.config['param_estimator'])
 
     def reset(self, seed=None, options=None, config=None, row=None):
 

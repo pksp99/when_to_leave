@@ -1,6 +1,0 @@
-numpy~=2.2.5
-plotly~=6.0.1
-scipy~=1.15.3
-pandas~=2.2.3
-gymnasium~=0.28.1
-setuptools~=72.1.0

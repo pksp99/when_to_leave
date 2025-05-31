@@ -7,17 +7,8 @@ import logging
 
 from src.commons.methods import file_path
 from src.rl_environments.base_env import BaseEnv
+from src.commons.constants import DEFAULT_CONFIG
 from typing import override
-
-
-DEFAULT_CONFIG = {
-    'alpha_range': [ (0 + i / 10) for i in range(1,10)],
-    'beta_range': [round(i * 0.5, 1) for i in range(2, 6)],
-    'h_range': [0.5],
-    'c_range': [25],
-    'total': range(10, 40), 
-    'travel_time': 'uniform',
-}
 
 
 class Env1(BaseEnv):
