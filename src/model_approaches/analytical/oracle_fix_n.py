@@ -17,7 +17,7 @@ class OracleFix_n(BaseModelApproach):
     
     def predict(self, row:dict, override=False):
         if not override and self._check_keys(row):
-            return [row[k] for k in self.prediction_keys]
+            return [row[k] for k in self.prediction_keys()]
         
         return self.evaluate(alpha=row['alpha'], beta=row['beta'],
                         intervals=row['intervals'], h=row['h'], c=row['c'],

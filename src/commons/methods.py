@@ -101,10 +101,18 @@ def gamma_shape_max_likeli_estim(n: int, intervals: list[float]) -> float:
     return alpha_hat
 
 def gamma_shape_gen_max_likeli_estim_bias(n: int, intervals: list[float]) -> float:
-    pass
+    n_intervals = intervals[:n]
+    mean = statistics.mean(n_intervals)
+    numerator = n * n * mean
+    denominator = n * sum(map(lambda x: x * math.log(x), n_intervals)) - n * mean * sum(map(math.log, n_intervals))
+    alpha_hat = numerator / denominator
+    return alpha_hat
 
 def gamma_shape_gen_max_likeli_estim_unbias(n: int, intervals: list[float]) -> float:
-    pass
+    alpha_hat_bais = gamma_shape_gen_max_likeli_estim_bias(n, intervals)
+    correction = (3 * alpha_hat_bais - 2 * alpha_hat_bais / (3 * (1 + alpha_hat_bais)) - 4 * alpha_hat_bais / (5 * (1 + alpha_hat_bais) ** 2))
+    alpha_hat = alpha_hat_bais - correction
+    return alpha_hat
 
 def gamma_estimate_parameters(n: int, intervals: list[float], param_estimator: AlphaEstimator) -> tuple[float, float]:
     n_intervals = intervals[:n]
