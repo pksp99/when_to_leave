@@ -19,9 +19,11 @@ class OracleFix_n(BaseModelApproach):
         if not override and self._check_keys(row):
             return [row[k] for k in self.prediction_keys()]
         
-        return self.evaluate(alpha=row['alpha'], beta=row['beta'],
+        cost = self.evaluate(alpha=row['alpha'], beta=row['beta'],
                         intervals=row['intervals'], h=row['h'], c=row['c'],
                         travel_time=row['travel_time'], n=self.n)
+        
+        return cost,
     
    
     

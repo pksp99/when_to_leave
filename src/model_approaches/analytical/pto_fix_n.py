@@ -24,8 +24,9 @@ class PTO_Fix_n(BaseModelApproach):
         if not override and self._check_keys(row):
             return [row[k] for k in self.prediction_keys()]
 
-        return self.evaluate(intervals=row['intervals'], h=row['h'], c=row['c'],
+        cost = self.evaluate(intervals=row['intervals'], h=row['h'], c=row['c'],
                              travel_time=row['travel_time'], n=self.n, param_estimator=self.config['param_estimator'])
+        return cost,
 
     def prediction_keys(self):
         return [f'cost_{self.model_name}']
