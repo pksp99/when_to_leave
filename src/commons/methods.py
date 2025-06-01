@@ -110,7 +110,7 @@ def gamma_shape_gen_max_likeli_estim_bias(n: int, intervals: list[float]) -> flo
 
 def gamma_shape_gen_max_likeli_estim_unbias(n: int, intervals: list[float]) -> float:
     alpha_hat_bais = gamma_shape_gen_max_likeli_estim_bias(n, intervals)
-    correction = (3 * alpha_hat_bais - 2 * alpha_hat_bais / (3 * (1 + alpha_hat_bais)) - 4 * alpha_hat_bais / (5 * (1 + alpha_hat_bais) ** 2))
+    correction = (3 * alpha_hat_bais - 2 * alpha_hat_bais / (3 * (1 + alpha_hat_bais)) - 4 * alpha_hat_bais / (5 * (1 + alpha_hat_bais) ** 2)) / n
     alpha_hat = alpha_hat_bais - correction
     return alpha_hat
 
