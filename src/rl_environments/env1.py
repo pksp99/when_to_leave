@@ -35,7 +35,6 @@ class Env1(BaseEnv):
         # Unable to compute u* cases
         if self.alpha_hat * self.N <= 1 or \
             self.alpha_hat * self.N > 300 or \
-             self.h / self.c >= 1 / self.beta or \
              self.h / self.c >= 1 / self.beta_hat:
             self.u_star_hat = self.mean_n * self.N
         else:
