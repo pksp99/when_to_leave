@@ -4,10 +4,10 @@ from src.commons import methods
 from src.commons.constants import AlphaEstimator
 
 class PTO_Fix_n(BaseModelApproach):
-    def __init__(self, n, config):
+    def __init__(self, n: int, param_estimator: AlphaEstimator):
         self.n = n
         self.model_name = f'PTO_Fix_n_{self.n}'
-        self.config = config
+        self.param_estimator = param_estimator
 
     @staticmethod
     def evaluate(intervals, h, c, travel_time, n, param_estimator:AlphaEstimator):
@@ -25,7 +25,7 @@ class PTO_Fix_n(BaseModelApproach):
             return [row[k] for k in self.prediction_keys()]
 
         cost = self.evaluate(intervals=row['intervals'], h=row['h'], c=row['c'],
-                             travel_time=row['travel_time'], n=self.n, param_estimator=self.config['param_estimator'])
+                             travel_time=row['travel_time'], n=self.n, param_estimator=self.param_estimator)
         return cost,
 
     def prediction_keys(self):

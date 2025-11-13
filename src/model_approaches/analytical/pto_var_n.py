@@ -5,9 +5,9 @@ from src.commons import methods
 from src.commons.constants import AlphaEstimator
 
 class PTO_Var_n(BaseModelApproach):
-    def __init__(self, config):
+    def __init__(self, param_estimator: AlphaEstimator):
         self.model_name = f'PTO_Var_n'
-        self.config = config
+        self.param_estimator = param_estimator
 
     @staticmethod
     def evaluate(intervals, h, c, travel_time, param_estimator:AlphaEstimator):
@@ -40,7 +40,7 @@ class PTO_Var_n(BaseModelApproach):
         if not override and self._check_keys(row):
             return [row[k] for k in self.prediction_keys()]
 
-        return self.evaluate(intervals=row['intervals'], h=row['h'], c=row['c'], travel_time=row['travel_time'], param_estimator=self.config['param_estimator'])
+        return self.evaluate(intervals=row['intervals'], h=row['h'], c=row['c'], travel_time=row['travel_time'], param_estimator=self.param_estimator)
 
     def prediction_keys(self):
         return [f'cost_{self.model_name}', f'observed_n_{self.model_name}']
