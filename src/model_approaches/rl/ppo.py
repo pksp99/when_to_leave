@@ -88,7 +88,7 @@ def train(EnvClass: type, config: dict, timesteps: int, model_path: Path):
     model = SB3PPO("MlpPolicy", env, verbose=1, device='cpu')
 
     print(f"[INFO] Training PPO for {timesteps} timesteps...")
-    model.learn(total_timesteps=timesteps)
+    model.learn(total_timesteps=timesteps, progress_bar=True)
     model.save(model_path)
     with open(str(model_path.with_suffix('.json')), 'w') as f:
         json.dump(config, f, indent=4)
