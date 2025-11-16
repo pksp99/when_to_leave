@@ -1,5 +1,6 @@
 from src.model_approaches.base_model_approach import BaseModelApproach
 from src.commons import methods
+import numpy as np
 
 class OracleVar_n(BaseModelApproach):
     def __init__(self):
@@ -8,11 +9,11 @@ class OracleVar_n(BaseModelApproach):
     @staticmethod
     def evaluate(alpha, beta, intervals, h, c, travel_time):
         total = len(intervals)
-        N = total
-        n = 0
+        N = total - 3
+        n = 3
         u_star = methods.get_u_star_binary_fast(N=N, alpha=alpha, beta=beta, h=h, c=c)
         t_now = 0
-        next_event = intervals[n]
+        next_event = np.random.gamma(alpha, beta)
         while (travel_time < u_star) and (N > 0):
             t_now = min(u_star - travel_time, next_event)
             if t_now == next_event:
@@ -20,7 +21,7 @@ class OracleVar_n(BaseModelApproach):
                 n += 1
                 u_star = methods.get_u_star_binary_fast(N=N, alpha=alpha, beta=beta, h=h, c=c)
                 t_now = 0
-                next_event = intervals[n]
+                next_event = np.random.gamma(alpha, beta)
             else:
                 break
         
