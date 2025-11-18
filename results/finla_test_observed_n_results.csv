@@ -1,15 +1,15 @@
 Test Name,PPO,PTO_Var_n,Oracle_Var_n
-low alpha from 0.1 to 1.0 with uniform travel time,5.3212,4.967,4.8471
-medium alpha from 1.0 to 3.0 with uniform travel time,8.2641,7.9036,7.9934
-high alpha from 3.0 to 5.0 with uniform travel time,9.5677,9.164,9.2595
-high beta from 3 to 5 with uniform travel time,8.3593,7.7694,8.0676
-low alpha from 0.1 to 1.0 with low travel time,7.1621,6.6543,6.8409
-medium alpha from 1.0 to 3.0 with low travel time,11.942,11.5333,11.7451
-high alpha from 3.0 to 5.0 with low travel time,13.3888,13.0273,13.0591
-high beta from 3 to 5 with low travel time,11.6356,10.8625,11.2235
-low alpha from 0.1 to 1.0 with high travel time,3.7564,3.5431,3.166
-medium alpha from 1.0 to 3.0 with high travel time,4.3094,4.0825,3.64
-high alpha from 3.0 to 5.0 with high travel time,4.7034,4.3814,4.0063
-high beta from 3 to 5 with high travel time,4.6518,4.3364,4.069
-Prof Data Test,16.4703,16.18,
-Bicycle Data Test,36.12222222222222,35.41111111111111,
+low alpha from 0.1 to 1.0 with uniform travel time,4.6602,4.595,4.4746
+medium alpha from 1.0 to 3.0 with uniform travel time,7.5102,7.3373,7.4681
+high alpha from 3.0 to 5.0 with uniform travel time,8.9262,8.5807,8.7306
+high beta from 3 to 5 with uniform travel time,7.6301,7.2022,7.6338
+low alpha from 0.1 to 1.0 with low travel time,6.5216,6.4818,6.7697
+medium alpha from 1.0 to 3.0 with low travel time,12.0649,11.8694,12.1097
+high alpha from 3.0 to 5.0 with low travel time,14.1553,13.9044,13.8997
+high beta from 3 to 5 with low travel time,11.9616,11.3405,11.797
+low alpha from 0.1 to 1.0 with high travel time,3.5608,3.5243,3.0949
+medium alpha from 1.0 to 3.0 with high travel time,4.1438,3.9906,3.5656
+high alpha from 3.0 to 5.0 with high travel time,4.6016,4.2976,4.0803
+high beta from 3 to 5 with high travel time,4.4697,4.2483,4.1075
+Prof Data Test,16.3212,16.1643,
+Bicycle Data Test,36.05555555555556,35.44444444444444,

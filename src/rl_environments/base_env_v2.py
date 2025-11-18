@@ -13,8 +13,8 @@ class BaseEnvV2(gym.Env):
         self.config = config
         self.reset()
 
-        # 1 = leave, others are wait
-        self.action_space = Discrete(10)
+        # 0 = wait, others are leaave
+        self.action_space = Discrete(5)
 
         self.observation_space = Box(low=0, high=np.inf, shape=(len(self._get_obs()),), dtype=np.float32)
 

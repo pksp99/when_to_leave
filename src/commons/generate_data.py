@@ -23,13 +23,13 @@ def get_realized_data(config: Dict[str, Any]) -> Dict[str, Any]:
     intervals = np.random.gamma(shape=alpha, scale=beta, size=total)
 
     if config['travel_time'] == TravelTimeDist.HIGH:
-        travel_time = np.sum(intervals[4:]) - np.random.gamma(shape=2, scale=alpha * beta)
+        travel_time = np.sum(intervals[3:]) * np.random.uniform(0.7, 0.9)
     elif config['travel_time'] == TravelTimeDist.LOW:
-        travel_time = np.random.gamma(shape=2, scale=2 * alpha * beta)
+        travel_time = np.sum(intervals[3:]) * np.random.uniform(0.1, 0.3)
+    elif config['travel_time'] == TravelTimeDist.MID:
+        travel_time = np.sum(intervals[3:]) * np.random.uniform(0.3, 0.7)
     else:  # TravelTimeDist.UNIFORM
-        travel_time = np.sum(intervals[4:]) * np.random.uniform(0, 1)
-
-    travel_time = max(alpha * beta, travel_time)
+        travel_time = np.sum(intervals[3:]) * np.random.uniform(0.1, 0.9)
 
     return {
         'alpha': alpha,

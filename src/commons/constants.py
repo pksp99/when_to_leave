@@ -4,6 +4,7 @@ class TravelTimeDist(str, Enum):
     UNIFORM = 'uniform'
     LOW = 'low'
     HIGH = 'high'
+    MID = 'mid'
 
 class AlphaEstimator(str, Enum):
     MOMENTS = 'method of moments'

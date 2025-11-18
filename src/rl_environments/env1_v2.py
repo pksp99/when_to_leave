@@ -36,3 +36,24 @@ class Env1V2(BaseEnvV2):
             self.u_star_hat = self.mean_n * self.N
         else:
             self.u_star_hat = methods.get_u_star_binary_fast(self.N, self.alpha_hat, self.beta_hat, self.h, self.c)
+            
+    @override
+    def step(self, action):
+
+        if self.n >= self.total:
+            action = 1
+
+        if action >= 1:
+            cur_time = self.cum_sum_intervals[self.n - 1]
+            reach_time = cur_time + max(self.u_star_hat, self.travel_time)
+            cost = methods.cal_cost(c=self.c, h=self.h, actual_time=self.cum_sum_intervals[-1],
+                                    predicted_time=reach_time)
+            self.obs_intervals = self.intervals[:self.total]
+            self.final_observed_n = self.n
+            self.n = self.total
+            self.N = 0
+            return self._get_obs(), -cost, True, False, self._get_info()
+        else:
+            self.n += 1
+            self.cal_derived_data()
+            return self._get_obs(), 0, False, False, self._get_info()
