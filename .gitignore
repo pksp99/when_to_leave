@@ -1,8 +1,8 @@
 data/*.log
 data/prof_data/*
-data/*.csv
-data/*.pkl
-data/*.json
+# data/*.csv
+# data/*.pkl
+# data/*.json
 mlruns/
 catboost_info/
 # Byte-compiled / optimized / DLL files

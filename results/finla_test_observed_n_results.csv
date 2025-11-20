@@ -11,5 +11,9 @@ low alpha from 0.1 to 1.0 with high travel time,3.5608,3.5243,3.0949
 medium alpha from 1.0 to 3.0 with high travel time,4.1438,3.9906,3.5656
 high alpha from 3.0 to 5.0 with high travel time,4.6016,4.2976,4.0803
 high beta from 3 to 5 with high travel time,4.4697,4.2483,4.1075
+low alpha from 0.1 to 1.0 with mid travel time,4.3022,4.2386,3.952
+medium alpha from 1.0 to 3.0 with mid travel time,6.8141,6.5728,6.9556
+high alpha from 3.0 to 5.0 with mid travel time,8.675,8.2369,8.6223
+high beta from 3 to 5 with mid travel time,7.0571,6.6355,7.2673
 Prof Data Test,16.3212,16.1643,
 Bicycle Data Test,36.05555555555556,35.44444444444444,
